@@ -1,22 +1,11 @@
 package global
 
-import "linglong/pkg/setting"
-import "time"
-
 var (
-	ServerSetting *ServerSettingS
-	JWTSetting    *JWTSettingS
-	AppSetting      *setting.AppSettingS
-	DatabaseSetting *setting.DatabaseSettingS
-	MasscanSetting *setting.MasscanSettingS
+	JWTSetting = &JWTSettingS{
+		Secret: "linglong_secret", // JWT 密钥（实际建议用环境变量）
+		Expire: time.Hour * 24,    // Token 有效期 24 小时
+	}
 )
-
-type ServerSettingS struct {
-	RunMode      string
-	HttpPort     int
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
-}
 
 type JWTSettingS struct {
 	Secret string
