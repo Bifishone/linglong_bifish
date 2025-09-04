@@ -1,22 +1,12 @@
 package models
 
-type Auth struct {
-	ID       int    `gorm:"primary_key" json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+// 模拟用户数据（实际可对接数据库，此处为测试用默认账号）
+var mockUsers = map[string]string{
+	"linglong": "123456", // 默认用户名：linglong，密码：123456
 }
 
+// CheckAuth 验证用户名密码
 func CheckAuth(username, password string) bool {
-	var auth Auth
-	db.Select("id").Where(Auth{Username: username, Password: password}).First(&auth)
-	if auth.ID > 0 {
-		return true
-	}
-
-	return false
-}
-
-func EditAuth(name string,data interface{}) bool {
-	db.Model(&Auth{}).Where("username = ? ",name).Updates(data)
-	return true
+	pwd, exists := mockUsers[username]
+	return exists && pwd == password
 }
