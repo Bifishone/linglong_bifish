@@ -1,16 +1,25 @@
 version: '3'
 services:
+  # 后端服务
   backend:
-    build: ./linglong
+    build: ./linglong  # 后端代码目录正确
     ports:
-      - "8080:8080"   # 后端端口映射（与前端请求匹配）
+      - "8080:8080"
     volumes:
       - ./linglong:/app
+    restart: always
+    environment:
+      - GIN_MODE=release  # 生产环境模式
     command: go run main.go
 
+  # 前端服务（修复路径：将frontend改为实际的web目录）
   frontend:
-    build: ./frontend
+    build: ./web  # 前端代码实际在web目录，而非frontend
     ports:
-      - "8001:80"     # 前端端口映射（与浏览器访问匹配）
+      - "80:80"  # 建议用80端口，访问更方便
     volumes:
-      - ./frontend:/app
+      - ./web:/app
+      - /app/node_modules  # 避免本地node_modules覆盖容器内依赖
+    restart: always
+    depends_on:
+      - backend  # 确保后端启动后再启动前端
