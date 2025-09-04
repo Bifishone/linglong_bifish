@@ -1,24 +1,14 @@
-#FROM node:latest as build-stage
-#
-#MAINTAINER drunk_kk
-#
-#RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
-#
-#WORKDIR /app
-#
-#COPY . .
-#
-#RUN rm -rf node_modules \
-#    && npm install node-sass \
-#    && cnpm run build
+# 构建阶段
+FROM node:16-alpine as build-stage
+WORKDIR /app
+COPY package*.json ./
+RUN npm install  # 安装依赖
+COPY . .
+RUN npm run build  # 构建静态文件
 
-FROM nginx:1.15.3-alpine as production-stage
-
-COPY ./nginx.conf /etc/nginx/nginx.conf
-
-COPY ./dist /usr/share/nginx/html
-#COPY --from=build-stage /app/dist /usr/share/nginx/html
-
-EXPOSE 8001
-
+# 运行阶段（用Nginx部署）
+FROM nginx:alpine as production-stage
+COPY --from=build-stage /app/dist /usr/share/nginx/html  # 复制构建产物
+COPY nginx.conf /etc/nginx/conf.d/default.conf  # 复制Nginx配置（如果有）
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
