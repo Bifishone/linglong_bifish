@@ -1,37 +1,16 @@
 version: '3'
 services:
-  mysql:
-    build: ./mysql
-    environment:
-      - TZ=Asia/Shanghai
-      - MYSQL_DATABASE=linglong
-      - MYSQL_ROOT_PASSWORD=linglong8s
+  backend:
+    build: ./linglong
     ports:
-      - "3305:3306"
-    restart: always
-    command: [
-      '--character-set-server=utf8mb4',
-      '--collation-server=utf8mb4_unicode_ci',
-    ]
-  server:
-    container_name: 'linglong-server'
-    build: .
+      - "8080:8080"   # 后端端口映射（与前端请求匹配）
+    volumes:
+      - ./linglong:/app
+    command: go run main.go
+
+  frontend:
+    build: ./frontend
     ports:
-      - "18000:18000"
-    links:
-      - mysql:mysql
-    depends_on:
-      - mysql
-    restart: always
-    environment:
-      - TZ=Asia/Shanghai
-  web:
-    container_name: 'linglong-web'
-    restart: always
-    build: ./web
-    ports:
-      - 8001:8001
-#    volumes:
-#      - ./nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - server
+      - "8001:80"     # 前端端口映射（与浏览器访问匹配）
+    volumes:
+      - ./frontend:/app
