@@ -1,0 +1,10 @@
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"username": "linglong", "password": "linglong5s"}' \
+  http://103.233.255.181:8001/api/login
+
+- 结合上述交流的报错，对该代码进行修改优化，以保证能够完整运行，所有修改的代码，都把修改后的完整的代码发给我
+
+[*] linglong（魔改）
+- Dockerfile、nginx.conf、docker-compose.yml，
+- brute.go、nmap.go、finger.go、main.go
