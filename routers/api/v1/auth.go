@@ -5,66 +5,49 @@ import (
 	"linglong/pkg/e"
 	"linglong/pkg/util"
 	"net/http"
-	"time"
-
-	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
 )
 
-// 登录请求参数
+// LoginRequest 登录请求参数
 type LoginRequest struct {
-	Username string `form:"username" valid:"Required;MinSize(3);MaxSize(10)"`
-	Password string `form:"password" valid:"Required;MinSize(3);MaxSize(16)"`
+	Username string `form:"username" binding:"required,min=3,max=10"`
+	Password string `form:"password" binding:"required,min=3,max=16"`
 }
 
-// @Summary 用户登录
-// @Produce  json
-// @Param username formData string true "用户名"
-// @Param password formData string true "密码"
-// @Success 200 {object} util.Response
-// @Failure 400 {object} util.Response
-// @Failure 500 {object} util.Response
-// @Router /auth [post]
+// Login 处理用户登录
 func Login(c *gin.Context) {
-	// 获取请求参数
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-
-	// 参数验证
-	valid := validation.Validation{}
-	valid.Required(username, "username").Message("用户名不能为空")
-	valid.Required(password, "password").Message("密码不能为空")
-	valid.MinSize(username, 3, "username").Message("用户名长度不能小于3")
-	valid.MaxSize(username, 10, "username").Message("用户名长度不能大于10")
-	valid.MinSize(password, 3, "password").Message("密码长度不能小于3")
-	valid.MaxSize(password, 16, "password").Message("密码长度不能大于16")
-
-	code := e.INVALID_PARAMS
-	if !valid.HasErrors() {
-		// 验证用户名密码是否正确
-		if models.CheckAuth(username, password) {
-			// 生成JWT令牌
-			token, err := util.GenerateToken(username)
-			if err != nil {
-				code = e.ERROR
-			} else {
-				code = e.SUCCESS
-				c.JSON(http.StatusOK, gin.H{
-					"code": code,
-					"msg":  e.GetMsg(code),
-					"data": gin.H{"token": token},
-				})
-				return
-			}
-		} else {
-			code = e.INVALID_PASS // 对应402错误码（无效密码）
-		}
+	var req LoginRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": e.INVALID_PARAMS,
+			"msg":  "参数错误",
+			"data": nil,
+		})
+		return
 	}
 
-	// 返回错误信息
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": make(map[string]string),
-	})
+	// 验证用户名密码（核心修复：调用模型层校验）
+	if models.CheckAuth(req.Username, req.Password) {
+		// 生成 JWT Token
+		token, err := util.GenerateToken(req.Username)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code": e.ERROR,
+				"msg":  "Token 生成失败",
+				"data": nil,
+			})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"code": e.SUCCESS,
+			"msg":  "登录成功",
+			"data": gin.H{"token": token},
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": e.ERROR_AUTH,
+			"msg":  "用户名或密码错误",
+			"data": nil,
+		})
+	}
 }
