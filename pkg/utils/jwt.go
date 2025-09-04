@@ -1,11 +1,9 @@
 package util
 
 import (
-	"errors"
 	"time"
-
-	"github.com/dgrijalva/jwt-go"
 	"linglong/global"
+	"github.com/dgrijalva/jwt-go"
 )
 
 var jwtSecret = []byte(global.JWTSetting.Secret)
@@ -15,7 +13,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-// 生成令牌
+// GenerateToken 生成 JWT Token
 func GenerateToken(username string) (string, error) {
 	nowTime := time.Now()
 	expireTime := nowTime.Add(global.JWTSetting.Expire)
@@ -30,21 +28,18 @@ func GenerateToken(username string) (string, error) {
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := tokenClaims.SignedString(jwtSecret)
-
 	return token, err
 }
 
-// 解析令牌
+// ParseToken 解析 JWT Token
 func ParseToken(token string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
-
 	if tokenClaims != nil {
 		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
 			return claims, nil
 		}
 	}
-
-	return nil, errors.New("invalid token")
+	return nil, err
 }
