@@ -176,3 +176,6 @@ https://github.com/chaitin/xray
 linglong 是 404Team [星链计划2.0](https://github.com/knownsec/404StarLink2.0-Galaxy)中的一环，如果对linglong  有任何疑问又或是想要找小伙伴交流，可以参考星链计划的加群方式。
 
 - [https://github.com/knownsec/404StarLink2.0-Galaxy#community](https://github.com/knownsec/404StarLink2.0-Galaxy#community)
+=======
+# linglong_bifish
+>>>>>>> 88b1e563ae0d828847e6cb23ee40fd01ce2f79bd
