@@ -1,30 +1,28 @@
-package utils
+package util
 
 import (
-	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	//"linglong/global"
+	"errors"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"linglong/global"
 )
 
-var jwtSecret = []byte("213123dd1")
+var jwtSecret = []byte(global.JWTSetting.Secret)
 
 type Claims struct {
 	Username string `json:"username"`
-	Password string `json:"password"`
 	jwt.StandardClaims
 }
 
-
-func GenerateToken(username, password string) (string, error) {
-	fmt.Println("GenerateToken")
+// 生成令牌
+func GenerateToken(username string) (string, error) {
 	nowTime := time.Now()
-	expireTime := nowTime.Add(3 * time.Hour)
+	expireTime := nowTime.Add(global.JWTSetting.Expire)
 
 	claims := Claims{
-		username,
-		password,
-		jwt.StandardClaims{
+		Username: username,
+		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
 			Issuer:    "linglong",
 		},
@@ -36,6 +34,7 @@ func GenerateToken(username, password string) (string, error) {
 	return token, err
 }
 
+// 解析令牌
 func ParseToken(token string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
@@ -47,5 +46,5 @@ func ParseToken(token string) (*Claims, error) {
 		}
 	}
 
-	return nil, err
+	return nil, errors.New("invalid token")
 }
